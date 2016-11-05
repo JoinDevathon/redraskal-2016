@@ -7,7 +7,7 @@ public class DevathonPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.getServer().getPluginManager().registerEvents(new BlockPlace(), this);
+        this.getServer().getPluginManager().registerEvents(new BlockPlace(this), this);
     }
 
     @Override
