@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -19,6 +20,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,7 +29,17 @@ import java.util.UUID;
  */
 public class SolarPanel implements Listener {
 
+    private static List<SolarPanel> LOADED_PANELS = new ArrayList<SolarPanel>();
+
+    public static void removeAll() {
+        for(SolarPanel solarPanel : LOADED_PANELS) {
+            solarPanel.remove(true);
+        }
+        LOADED_PANELS.clear();
+    }
+
     private JavaPlugin javaPlugin;
+    private SolarPanel instance;
     private Location baseLocation;
     private UUID uuid;
     private Block baseBlock;
@@ -36,6 +49,7 @@ public class SolarPanel implements Listener {
 
     public SolarPanel(Block baseBlock, UUID uuid, JavaPlugin javaPlugin) {
         this.javaPlugin = javaPlugin;
+        this.instance = this;
         this.uuid = uuid;
         this.baseBlock = baseBlock;
         this.rod_one = this.baseBlock.getRelative(BlockFace.UP);
@@ -45,6 +59,7 @@ public class SolarPanel implements Listener {
         this.create();
         if(getNearbyPlayers() > 0) { this.spawn(); }
         this.javaPlugin.getServer().getPluginManager().registerEvents(this, this.javaPlugin);
+        LOADED_PANELS.add(this);
     }
 
     @EventHandler
@@ -65,9 +80,16 @@ public class SolarPanel implements Listener {
     }
 
     @EventHandler
+    public void onArmorStandManipulate(PlayerArmorStandManipulateEvent playerArmorStandManipulateEvent) {
+        if(playerArmorStandManipulateEvent.getRightClicked().hasMetadata("solarPanel_" + this.uuid.toString())) {
+            playerArmorStandManipulateEvent.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onBlockBreak(BlockBreakEvent blockBreakEvent) {
         if(blockBreakEvent.getBlock().hasMetadata("solarPanel_" + this.uuid.toString())) {
-            this.remove();
+            this.remove(false);
             try {
                 Utils.remove(this);
             } catch (IOException e) {
@@ -76,16 +98,19 @@ public class SolarPanel implements Listener {
         }
     }
 
-    public void remove() {
+    public void remove(boolean stayInGlobalList) {
         this.baseBlock.setType(Material.AIR);
         this.rod_one.setType(Material.AIR);
-        this.panel.remove();
+        this.despawn();
         HandlerList.unregisterAll(this);
+        if(!stayInGlobalList) { LOADED_PANELS.remove(this); }
     }
 
     public void despawn() {
-        this.loaded = false;
-        this.panel.remove();
+        if(this.loaded) {
+            this.loaded = false;
+            this.panel.remove();
+        }
     }
 
     public boolean isLoaded() {
@@ -106,6 +131,10 @@ public class SolarPanel implements Listener {
         return this.baseLocation;
     }
 
+    public Block getBaseBlock() {
+        return this.baseBlock;
+    }
+
     private void auto() {
         new BukkitRunnable() {
             public void run() {
@@ -118,6 +147,21 @@ public class SolarPanel implements Listener {
                 }
             }
         }.runTaskTimer(javaPlugin, 0, 10L);
+
+        new BukkitRunnable() {
+            public void run() {
+                if(panel.isDead()) {
+                    this.cancel();
+                } else {
+                    int percent = Angle.percent(baseLocation.getWorld());
+                    if(percent <= 105) {
+                        Utils.power(instance, true);
+                    } else {
+                        Utils.power(instance, false);
+                    }
+                }
+            }
+        }.runTaskTimer(javaPlugin, 0, 20L);
     }
 
     private void rotate(float degrees) {
@@ -145,5 +189,6 @@ public class SolarPanel implements Listener {
         armorStand.setGravity(false);
         armorStand.setVisible(false);
         armorStand.setHelmet(new ItemStack(Material.CARPET, 1, (byte) 9));
+        armorStand.setMetadata("solarPanel_" + uuid.toString(), new FixedMetadataValue(this.javaPlugin, true));
     }
 }

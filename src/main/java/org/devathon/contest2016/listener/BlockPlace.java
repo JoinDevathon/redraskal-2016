@@ -1,5 +1,6 @@
 package org.devathon.contest2016.listener;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,17 +27,23 @@ public class BlockPlace implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent blockPlaceEvent) {
         if(blockPlaceEvent.getBlockPlaced().getType() == Material.OBSIDIAN) {
-            SolarPanel solarPanel =
-                    new SolarPanel(blockPlaceEvent.getBlockPlaced(), UUID.randomUUID(), this.javaPlugin);
-            new BukkitRunnable() {
-                public void run() {
-                    try {
-                        Utils.save(solarPanel);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            if(blockPlaceEvent.getItemInHand().hasItemMeta()
+                    && blockPlaceEvent.getItemInHand().getItemMeta().getDisplayName() != null) {
+                String displayName = blockPlaceEvent.getItemInHand().getItemMeta().getDisplayName();
+                if(displayName.equalsIgnoreCase(ChatColor.translateAlternateColorCodes('&', "&eSolar Panel"))) {
+                    SolarPanel solarPanel =
+                            new SolarPanel(blockPlaceEvent.getBlockPlaced(), UUID.randomUUID(), this.javaPlugin);
+                    new BukkitRunnable() {
+                        public void run() {
+                            try {
+                                Utils.save(solarPanel);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.runTaskAsynchronously(this.javaPlugin);
                 }
-            }.runTaskAsynchronously(this.javaPlugin);
+            }
         }
     }
 }

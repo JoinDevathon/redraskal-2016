@@ -1,7 +1,6 @@
-name: Devathon Project
+name: Solar
 description: A project for the Devathon contest
 version: 1.0.0
 author: redraskal
 
 main: org.devathon.contest2016.DevathonPlugin
-
