@@ -7,6 +7,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.devathon.contest2016.SolarPanel;
 
+import java.util.UUID;
+
 /**
  * Created by Redraskal_2 on 11/5/2016.
  */
@@ -21,7 +23,7 @@ public class BlockPlace implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent blockPlaceEvent) {
         if(blockPlaceEvent.getBlockPlaced().getType() == Material.OBSIDIAN) {
-            new SolarPanel(blockPlaceEvent.getBlockPlaced(), this.javaPlugin);
+            new SolarPanel(blockPlaceEvent.getBlockPlaced(), UUID.randomUUID(), this.javaPlugin);
         }
     }
 }
