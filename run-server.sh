@@ -49,7 +49,8 @@ while true; do
     else
         mvn clean install
     fi
-    cp target/DevathonProject-1.0-SNAPSHOT.jar server/plugins/DevathonProject-1.0-SNAPSHOT.jar
+    cp out/redraskal-2016.jar server/plugins/redraskal-2016.jar
+	rm out/redraskal-2016.jar
     cd server
 
     if [[ $(uname) == MING* ]]; then
