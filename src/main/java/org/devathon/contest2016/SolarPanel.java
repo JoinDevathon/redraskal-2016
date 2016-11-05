@@ -18,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -39,7 +40,7 @@ public class SolarPanel implements Listener {
         this.baseBlock = baseBlock;
         this.rod_one = this.baseBlock.getRelative(BlockFace.UP);
         this.baseLocation = Utils.center(this.baseBlock.getRelative(BlockFace.UP).getLocation())
-                .subtract(0, 0.3, 0);
+                .subtract(0, 0.40, 0);
 
         this.create();
         if(getNearbyPlayers() > 0) { this.spawn(); }
@@ -67,6 +68,11 @@ public class SolarPanel implements Listener {
     public void onBlockBreak(BlockBreakEvent blockBreakEvent) {
         if(blockBreakEvent.getBlock().hasMetadata("solarPanel_" + this.uuid.toString())) {
             this.remove();
+            try {
+                Utils.remove(this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -94,6 +100,10 @@ public class SolarPanel implements Listener {
             }
         }
         return players;
+    }
+
+    public Location getBaseLocation() {
+        return this.baseLocation;
     }
 
     private void auto() {

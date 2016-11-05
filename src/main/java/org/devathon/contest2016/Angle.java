@@ -23,6 +23,9 @@ public class Angle {
 
     public static int percent(World world) {
         double time = (double) world.getFullTime();
+        if(time > 24000) {
+            time = time / 24000;
+        }
         return convert(((time/12000)*100));
     }
 
@@ -34,7 +37,12 @@ public class Angle {
     public static float calc(World world) {
         try {
             float t = cache.get(percent(world));
-            return t;
+            if(world.getFullTime() > 6000
+                    && world.getFullTime() < 11500) {
+                return -t;
+            } else {
+                return t;
+            }
         } catch (Exception e) { return 5f; }
     }
 }

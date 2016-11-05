@@ -5,8 +5,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.devathon.contest2016.SolarPanel;
+import org.devathon.contest2016.Utils;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -23,7 +26,17 @@ public class BlockPlace implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent blockPlaceEvent) {
         if(blockPlaceEvent.getBlockPlaced().getType() == Material.OBSIDIAN) {
-            new SolarPanel(blockPlaceEvent.getBlockPlaced(), UUID.randomUUID(), this.javaPlugin);
+            SolarPanel solarPanel =
+                    new SolarPanel(blockPlaceEvent.getBlockPlaced(), UUID.randomUUID(), this.javaPlugin);
+            new BukkitRunnable() {
+                public void run() {
+                    try {
+                        Utils.save(solarPanel);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.runTaskAsynchronously(this.javaPlugin);
         }
     }
 }
