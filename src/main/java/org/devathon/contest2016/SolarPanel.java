@@ -6,10 +6,13 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.EulerAngle;
 
 /**
  * Created by Redraskal_2 on 11/5/2016.
@@ -19,6 +22,7 @@ public class SolarPanel implements Listener {
     private JavaPlugin javaPlugin;
     private Location baseLocation;
     private Block baseBlock;
+    private float rotation;
     private Block rod_one;
     private Block rod_two;
 
@@ -41,13 +45,49 @@ public class SolarPanel implements Listener {
         this.rod_two = this.rod_one.getRelative(BlockFace.UP);
         this.baseLocation = Utils.center(this.rod_one.getRelative(BlockFace.UP).getLocation())
                 .subtract(0, 0.45, 0);
+        this.rotation = 90f;
 
         this.create();
         this.spawn();
+
+        // Tests
+        new BukkitRunnable() {
+            float current = 0f;
+            public void run() {
+                if(current < 180f) {
+                    current+=.1f;
+                } else {
+                    current = 0f;
+                }
+                rotate(current);
+            }
+        }.runTaskTimer(javaPlugin, 0, 5L);
     }
 
-    private void rotate(float degrees) {
-        //TODO
+    public void rotate(float degrees) {
+        // Rotate heads
+        this.panel_left_one.setHeadPose(new EulerAngle(0, 0, degrees));
+        this.panel_left_two.setHeadPose(new EulerAngle(0, 0, degrees));
+        this.panel_left_three.setHeadPose(new EulerAngle(0, 0, degrees));
+
+        this.panel_middle_one.setHeadPose(new EulerAngle(0, 0, degrees));
+        this.panel_middle_two.setHeadPose(new EulerAngle(0, 0, degrees));
+        this.panel_middle_three.setHeadPose(new EulerAngle(0, 0, degrees));
+
+        this.panel_right_one.setHeadPose(new EulerAngle(0, 0, degrees));
+        this.panel_right_two.setHeadPose(new EulerAngle(0, 0, degrees));
+        this.panel_right_three.setHeadPose(new EulerAngle(0, 0, degrees));
+
+        double difference = (((double) ((rotation-degrees)/180)));
+        this.teleport(this.panel_left_one, difference);
+        this.teleport(this.panel_middle_one, difference);
+        this.teleport(this.panel_right_one, difference);
+
+        this.rotation = degrees;
+    }
+
+    private void teleport(Entity entity, double yChange) {
+        entity.teleport(entity.getLocation().clone().add(0, yChange, 0));
     }
 
     private void create() {
@@ -98,7 +138,7 @@ public class SolarPanel implements Listener {
         armorStand.setRemoveWhenFarAway(false);
         armorStand.setBasePlate(false);
         armorStand.setGravity(false);
-        armorStand.setVisible(false);
+        armorStand.setVisible(true);
         armorStand.setHelmet(new ItemStack(Material.CARPET, 1, (byte) 9));
     }
 }
