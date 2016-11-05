@@ -8,16 +8,19 @@ import org.bukkit.Location;
 public class Utils {
 
     public static Location center(Location toCenter) {
-        if(toCenter.getX() >= 0) {
-            toCenter.add(.5, 0, 0);
+        toCenter.setX(Math.floor(toCenter.getX()));
+        toCenter.setZ(Math.floor(toCenter.getZ()));
+
+        if(toCenter.getX() < 0) {
+            toCenter.setX((toCenter.getX() + -.5));
         } else {
-            toCenter.subtract(.5, 0, 0);
+            toCenter.setX((toCenter.getX() + .5));
         }
 
-        if(toCenter.getZ() >= 0) {
-            toCenter.add(0, 0, .5);
+        if(toCenter.getZ() < 0) {
+            toCenter.setZ((toCenter.getZ() + -.5));
         } else {
-            toCenter.subtract(0, 0, .5);
+            toCenter.setZ((toCenter.getZ() + .5));
         }
 
         return toCenter;
