@@ -22,7 +22,6 @@ public class SolarPanel implements Listener {
     private JavaPlugin javaPlugin;
     private Location baseLocation;
     private Block baseBlock;
-    private float rotation;
     private Block rod_one;
     private Block rod_two;
 
@@ -45,23 +44,29 @@ public class SolarPanel implements Listener {
         this.rod_two = this.rod_one.getRelative(BlockFace.UP);
         this.baseLocation = Utils.center(this.rod_one.getRelative(BlockFace.UP).getLocation())
                 .subtract(0, 0.45, 0);
-        this.rotation = 90f;
 
         this.create();
         this.spawn();
 
+        rotate(calculateAngle());
+
         // Tests
         new BukkitRunnable() {
-            float current = 0f;
             public void run() {
-                if(current < 180f) {
-                    current+=.1f;
-                } else {
-                    current = 0f;
+                if(baseLocation.getWorld().getGameRuleValue("doDaylightCycle").equalsIgnoreCase("true")) {
+                    rotate(calculateAngle());
                 }
-                rotate(current);
             }
-        }.runTaskTimer(javaPlugin, 0, 5L);
+        }.runTaskTimer(javaPlugin, 0, 10L);
+    }
+
+    private float calculateAngle() {
+        float val = ((this.baseLocation.getWorld().getFullTime() / 60000F) * 100);
+        if(this.baseLocation.getWorld().getFullTime() >= 6000) {
+            return val;
+        } else {
+            return -val;
+        }
     }
 
     public void rotate(float degrees) {
@@ -78,16 +83,21 @@ public class SolarPanel implements Listener {
         this.panel_right_two.setHeadPose(new EulerAngle(0, 0, degrees));
         this.panel_right_three.setHeadPose(new EulerAngle(0, 0, degrees));
 
-        double difference = (((double) ((rotation-degrees)/180)));
-        this.teleport(this.panel_left_one, difference);
-        this.teleport(this.panel_middle_one, difference);
-        this.teleport(this.panel_right_one, difference);
+        // Change y coords
+        //float difference = (degrees/);
+        this.teleport(this.panel_left_one, -degrees);
+        this.teleport(this.panel_middle_three, -degrees);
+        this.teleport(this.panel_right_one, -degrees);
 
-        this.rotation = degrees;
+        this.teleport(this.panel_left_three, degrees);
+        this.teleport(this.panel_middle_one, degrees);
+        this.teleport(this.panel_right_three, degrees);
     }
 
     private void teleport(Entity entity, double yChange) {
-        entity.teleport(entity.getLocation().clone().add(0, yChange, 0));
+        Location newLocation = entity.getLocation().clone();
+        newLocation.setY((newLocation.getY()+yChange));
+        entity.teleport(newLocation);
     }
 
     private void create() {
@@ -138,7 +148,7 @@ public class SolarPanel implements Listener {
         armorStand.setRemoveWhenFarAway(false);
         armorStand.setBasePlate(false);
         armorStand.setGravity(false);
-        armorStand.setVisible(true);
+        armorStand.setVisible(false);
         armorStand.setHelmet(new ItemStack(Material.CARPET, 1, (byte) 9));
     }
 }
