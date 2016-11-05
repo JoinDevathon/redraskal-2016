@@ -14,4 +14,3 @@ public class DevathonPlugin extends JavaPlugin {
         // put your disable code here
     }
 }
-
