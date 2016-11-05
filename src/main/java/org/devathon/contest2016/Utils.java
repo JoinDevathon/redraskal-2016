@@ -102,6 +102,10 @@ public class Utils {
         for(Block redstone : getRedstone(solarPanel)) {
             redstone.getState().update(toggle, true);
         }
+
+        for(Block piston : getPistons(solarPanel)) {
+            piston.getState().update(toggle, true);
+        }
     }
 
     public static Block[] getDroppers(SolarPanel solarPanel) {
@@ -153,7 +157,8 @@ public class Utils {
         Block[] nearbyBlocks = getNearbyBlocks(solarPanel);
         List<Block> availableBlocks = new ArrayList<Block>();
         for(Block block : nearbyBlocks) {
-            if(block.getType() == Material.REDSTONE_WIRE) {
+            if(block.getType() == Material.REDSTONE_WIRE
+                    || block.getType() == Material.REDSTONE) {
                 availableBlocks.add(block);
             }
         }
